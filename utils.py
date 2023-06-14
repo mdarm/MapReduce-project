@@ -50,6 +50,6 @@ def calculate_error_margin(times, average):
         float: Error margin.
     """
     squared_diffs = [(time - average) ** 2 for time in times]
-    variance = sum(squared_diffs) / len(times)
+    variance = sum(squared_diffs) / (len(times) - 1)
     standard_deviation = variance ** 0.5
     return 2 * standard_deviation

@@ -15,21 +15,23 @@ def main():
     times = {}
 
     # Run queries and store execution times
-    times['rdd_query1'], _ = rdd_query1()
-    times['sql_parquet_query1'], _ = sql_parquet_query1()
-    times['sql_csv_query1'], _ = sql_csv_query1()
+    #times['rdd_query1'], _ = rdd_query1()
+    #times['sql_parquet_query1'], _ = sql_parquet_query1()
+    #times['sql_csv_query1'], _ = sql_csv_query1()
 
-    # Write times to a text file
-    #with open('times.txt', 'w') as f:
-    #    for query, time in times.items():
-    #        f.write("%s: %f seconds\n" % ((query), (time)))
-    
+    # Calculate execution times for each query
+    for i in range(1, 3):
+        query_name = 'rdd_query%s' % (i)
+        parquet_query_name = 'sql_parquet_query%s' % (i)
+        times[query_name], _ = globals()[query_name]()
+        times[parquet_query_name], _ = globals()[parquet_query_name]()
+
     # Compute averages and error margins and write to a text file
     with open('times.txt', 'w') as f:
         for query, time_list in times.items():
             avg_time = calculate_average(time_list)
             error_margin = calculate_error_margin(time_list, avg_time)
-            f.write('%s: %f with an uncertainty of %f seconds\n' % (query, avg_time, error_margin))
+            f.write('%s: %.4f with an uncertainty of %.4f seconds\n' % (query, avg_time, error_margin))
 
 
 if __name__ == "__main__":
