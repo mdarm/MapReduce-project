@@ -1,0 +1,3 @@
+sql_csv_query1: 2.220618 seconds
+sql_parquet_query1: 9.400090 seconds
+rdd_query1: 1.668612 seconds
