@@ -1,3 +1,0 @@
-sql_csv_query1: 1.176229 with an uncertainty of 0.161579 seconds
-sql_parquet_query1: 2.627461 with an uncertainty of 3.483896 seconds
-rdd_query1: 0.414791 with an uncertainty of 0.758051 seconds

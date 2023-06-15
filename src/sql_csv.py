@@ -3,6 +3,7 @@ from pyspark.sql.functions import collect_list
 from pyspark.sql.types import StructField, StructType, IntegerType, FloatType, StringType
 from utils import timeit
 
+
 # Build spark instance
 spark = SparkSession \
     .builder \

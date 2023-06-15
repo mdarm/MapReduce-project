@@ -1,8 +1,25 @@
-#*.txt main.py
+# Import RDD queries 
 from rdd import query1 as rdd_query1
-from sql_parquet import query1 as sql_parquet_query1
+from rdd import query2 as rdd_query2
+from rdd import query3 as rdd_query3
+from rdd import query4 as rdd_query4
+from rdd import query5 as rdd_query5
+
+# Import SQL-on-csv queries
 from sql_csv import query1 as sql_csv_query1
-# Import other queries...
+from sql_csv import query2 as sql_csv_query2
+from sql_csv import query3 as sql_csv_query3
+from sql_csv import query4 as sql_csv_query4
+from sql_csv import query5 as sql_csv_query5
+
+# Import SQL-on-Parquet queries
+from sql_parquet import query1 as sql_parquet_query1
+from sql_parquet import query2 as sql_parquet_query2
+from sql_parquet import query3 as sql_parquet_query3
+from sql_parquet import query4 as sql_parquet_query4
+from sql_parquet import query5 as sql_parquet_query5
+
+# Import csv-to-parquet converter
 from csv_to_parquet import convert_csv_to_parquet
 
 # Import necessary functions
@@ -27,7 +44,7 @@ def main():
         times[parquet_query_name], _ = globals()[parquet_query_name]()
 
     # Compute averages and error margins and write to a text file
-    with open('times.txt', 'w') as f:
+    with open('../output/times.txt', 'w') as f:
         for query, time_list in times.items():
             avg_time = calculate_average(time_list)
             error_margin = calculate_error_margin(time_list, avg_time)
