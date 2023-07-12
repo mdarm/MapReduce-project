@@ -89,7 +89,7 @@ def query3():
     query = """
         SELECT m.name AS movie_name, m.revenue AS revenue
         FROM movies AS m
-        JOIN movie_genres AS mg ON m.mv_id = mg.mv_id
+        JOIN genres AS mg ON m.mv_id = mg.mv_id
         WHERE mg.genre = 'Animation' AND m.year = 1995 AND m.revenue > 0
         ORDER BY m.revenue DESC
         LIMIT 1
