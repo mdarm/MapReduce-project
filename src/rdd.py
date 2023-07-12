@@ -68,9 +68,11 @@ def query3():
     joined = union.groupByKey() \
                   .flatMap(lambda kv: [(m[1], m[2]) for m in kv[1] if m[0] == 'movies' for g in kv[1] if g[0] == 'genres'])
     
-    best_animation_movie = joined.reduce(lambda movie, next_movie: movie if movie[1] > next_movie[1] else next_movie)
+    time_taken, best_animation_movie = timeit(joined.reduce, lambda movie, next_movie: movie if movie[1] > next_movie[1] else next_movie)
 
-    return timeit(best_animation_movie.collect())
+    #time_taken, best_animation_movie = timeit(joined.reduce(lambda movie, next_movie: movie if movie[1] > next_movie[1] else next_movie))
+
+    return time_taken, best_animation_movie 
 
 
 def query4():
@@ -95,7 +97,7 @@ def query4():
                        .reduceByKey(lambda x, y: x if x[1] > y[1] else y) \
                        .sortBy(lambda pair: pair[0])
     
-    return timeit(best_comedy.collect())
+    return timeit(best_comedy.collect)
 
 
 def query5():
@@ -108,4 +110,4 @@ def query5():
                               .map(lambda fields: (fields[0], fields[1][0] / fields[1][1])) \
                               .sortBy(lambda pair: pair[0])
 
-    return timeit(mapped_movies.collect())
+    return timeit(mapped_movies.collect)
