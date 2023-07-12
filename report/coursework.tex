@@ -1,0 +1,121 @@
+\documentclass[12pt,twoside]{article}
+
+\newcommand{\reporttitle}{M111: Big Data Management}
+\newcommand{\reportauthor}{Michael Darmanis\textsuperscript{*}}
+\newcommand{\reporttype}{Project}
+\newcommand{\sid}{7115152200004}
+
+% include files that load packages and define macros
+\input{includes} % various packages needed for maths etc.
+\input{notation} % short-hand notation and macros
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+% front page
+\input{titlepage}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% Main document
+\section{Introduction}
+
+\subsection{}
+For creating a \texttt{files} directory in the HDFS, the following command was used
+\mint{bash}|hadoop fs -mkdir -p ~/files|
+\noindent and to populate it with the project's \texttt{.csv} files
+\mint{bash}|hadoop fs -put *.csv ~/files .|
+\noindent Since the only \texttt{.csv} files populating the working directory were the project's ones, it was fairly easy to fetch all of them using \texttt{*.csv}.
+Fig.~\ref{fig:files} shows a print-screen of the \texttt{.csv} files lying within the created \texttt{files} directory.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{./figures/files.png}
+    \caption{HDFS directory containing the project's datasets in \texttt{.csv} format.}
+    \label{fig:files}
+\end{figure}
+
+The same files were then saved in \texttt{.parquet} format, using Snip.~\ref{code:files}, as can be seen in the print-screen of Fig~\ref{fig:files-all}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{./figures/files-all.png}
+    \caption{HDFS directory containing the project's datasets in both \texttt{.csv} and \texttt{.parquet} formats.}
+    \label{fig:files-all}
+\end{figure}
+
+\section{Basics}
+
+\subsection{Repartition and Broadcast Joins}
+
+\begin{figure}[htb]
+    \centering
+    \input{barplot}
+    \caption{Caption}
+    \label{fig:enter-label}
+\end{figure}
+
+\subsection{Tweaking the Catalyst Optimiser}
+
+\begin{figure}[htb]
+    \centering
+    \input{modes}
+    \caption{Execution time, for a particular query, with and without Spark's SQL Optimiser.}
+    \label{fig:enter-label1}
+\end{figure}
+
+Without Optimization (Sort Merge Join):
+
+\begin{minted}{bash}
+== Physical Plan ==
+*(6) SortMergeJoin [mv_id#8], [mv_id#1], Inner
+\end{minted}
+
+\noindent This is a Sort Merge Join, which is an operation where two dataframes are joined by sorting the data and then merging the sorted data. This type of join is used when the data is too large to fit into memory for a Broadcast Join.
+
+The stages of this join operation involve filtering data where mv\textunderscore id is not null, limiting the result set to 100, then sorting the data and performing the join operation. The SortMergeJoin operation requires that both sides of the join have been partitioned and sorted by the join key (mv\textunderscore id in this case). Hence, there are additional Sort and Exchange operations before the join.
+
+\begin{minted}{bash}
++- *(2) GlobalLimit 100
++- Exchange SinglePartition
++- *(1) LocalLimit 100
+\end{minted}
+
+\noindent These operations represent the limit that is applied to the "movie\textunderscore genres" table (the query limits the result set to 100). The GlobalLimit means that the limit is applied across the entire dataset, not just per partition.
+
+The time taken for the entire operation is 13.2132 seconds.
+
+With Optimization (Broadcast Hash Join):
+
+\begin{minted}{bash}
+== Physical Plan ==
+*(3) BroadcastHashJoin [mv_id#8], [mv_id#1], Inner, BuildLeft
+\end{minted}
+
+\noindent This is a Broadcast Hash Join, which is a type of join operation where the smaller DataFrame is broadcast to all the nodes containing partitions of the larger DataFrame for comparison and join operations. This type of join can be significantly faster than a sort-merge join because it doesn't require the data to be sorted first, and it can be done entirely in memory if the smaller DataFrame is small enough.
+
+\begin{minted}[breaklines, breakafter=d]{bash}
+:- BroadcastExchange HashedRelationBroadcastMode(List(cast(input[0, int, false] as bigint)
+\end{minted}
+
+\noindent The BroadcastExchange operation represents broadcasting the smaller DataFrame to the worker nodes. The broadcasting operation will transform the DataFrame into a more efficient data structure (a hash table) to speed up the subsequent join operation.
+
+The time taken for the entire operation is 3.7529 seconds, which is significantly faster than the time taken when the optimization is not enabled. The optimizer has chosen a more efficient join strategy (broadcast hash join instead of sort merge join) based on the size of the data and the nature of the operation, which leads to a faster execution time.
+
+Overall, the difference between these two execution plans demonstrates the power and importance of the Spark Catalyst optimizer in efficiently executing Spark jobs. It can make smart decisions, such as using a BroadcastHashJoin instead of a SortMergeJoin, which significantly improves performance.
+
+\section{Code Snippets}
+\begin{code}
+\captionof{listing}{\texttt{csv\textunderscore to\textunderscore parquet.py}}
+\label{code:files}
+\inputminted[breaklines, breakafter=d, linenos, frame=single]{python}{./code/csv_to_parquet.py}
+\end{code}
+
+
+\include{endmatter}
+
+\end{document}
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

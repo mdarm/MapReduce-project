@@ -1,0 +1,54 @@
+\begin{tikzpicture}
+\begin{axis}[
+    ybar=5pt,
+    enlargelimits=0.12,
+    bar width=10pt,
+    ylabel={Execution time (seconds)},
+    xlabel={Queries},
+    width=0.95\textwidth,
+    height=7cm,
+    symbolic x coords={Q1,Q2,Q3,Q4,Q5},
+    xtick=data,
+    ymode=log,
+    ymin=0.1,
+    ymajorgrids=true,
+    axis x line* = bottom,
+    axis y line* = left,
+    legend style={cells={anchor=west}, draw=none},
+    legend style={at={(0.5,1.15)}, anchor=north,legend columns=-1},
+    legend columns=-1,
+    point meta=explicit symbolic,
+    nodes near coords=\pgfmathprintnumber{\pgfplotspointmeta},
+    visualization depends on={y<0.2?0:1 \as \myshift},
+    every node near coord/.append style={font=\tiny, anchor=north, yshift=(\myshift*10pt)},
+    ]
+\addplot table [meta=Y] {
+  X Y
+  Q1  1.61
+  Q2 54.86
+  Q3  5.27
+  Q4  0.44
+  Q5  0.39
+};
+
+\addplot table [meta=Y] {
+  X Y
+  Q1 10.77
+  Q2 11.08
+  Q3  8.35
+  Q4 12.15
+  Q5  9.59
+};
+
+\addplot table [meta=Y] {
+  X Y
+  Q1 11.18
+  Q2 25.38
+  Q3  9.47
+  Q4 14.37
+  Q5 10.18
+};
+
+\legend{RDD API\hphantom{xz}, Spark SQL (Parquet)\hphantom{xz} , Spark SQL (csv) }
+\end{axis}
+\end{tikzpicture}

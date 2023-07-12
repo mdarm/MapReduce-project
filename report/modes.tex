@@ -1,0 +1,18 @@
+\begin{tikzpicture}
+  \begin{axis}[,
+    xbar,
+    y axis line style = { opacity = 0 },
+    axis x line       = none,
+    tickwidth         = 0pt,
+    ytick             = data,
+    enlarge y limits  = 0.2,
+    enlarge x limits  = 1,
+    y = 1cm,
+    width=0.3\textwidth,
+    bar width=4mm,
+    symbolic y coords = {Execution with Optimiser, Execution without Optimiser},
+    nodes near coords,
+  ]
+  \addplot[red!80, fill=red!40] coordinates { (3.7529,Execution with Optimiser) (13.2132,Execution without Optimiser)};
+  \end{axis}
+\end{tikzpicture}
