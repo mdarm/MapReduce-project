@@ -12,7 +12,7 @@ def timeit(func, *args, **kwargs):
     Returns:
         tuple: A tuple containing the list of execution times and the result of the last function call.
     """
-    runs = 5  # change this to the number of runs you want
+    runs = 5 
     times = []
 
     for i in range(runs):
