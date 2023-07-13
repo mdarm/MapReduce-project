@@ -1,23 +1,36 @@
 import time
+import pyspark.rdd
+import pyspark.sql.dataframe
 
-def timeit(func, *args, **kwargs):
+
+def timeit(func, spark, *args, **kwargs):
     """
     Measure execution time of a function for multiple runs.
     
     Args:
         func: Function to be executed.
+        spark: SparkSession instance.
         *args: Variable length argument list for the function.
         **kwargs: Arbitrary keyword arguments for the function.
     
     Returns:
         tuple: A tuple containing the list of execution times and the result of the last function call.
     """
-    runs = 5 
+    runs = 90 
     times = []
 
     for i in range(runs):
         start = time.time()
         result = func(*args, **kwargs)
+        if isinstance(result, pyspark.rdd.RDD):
+            result.persist()
+            result.collect()
+            result.unpersist()
+        elif isinstance(result, pyspark.sql.dataframe.DataFrame):
+            # If the result is a DataFrame, create a unique temp view for each run
+            temp_view_name = "temp_view_%s" % i
+            result.createOrReplaceTempView(temp_view_name)
+            spark.sql("SELECT * FROM %s" % temp_view_name).show()
         end = time.time()
         times.append(end - start)
 

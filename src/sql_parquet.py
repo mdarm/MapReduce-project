@@ -1,7 +1,6 @@
 # sql_parquet_api.py
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import collect_list
-from utils import timeit
 
 
 spark = SparkSession \
@@ -31,7 +30,7 @@ def query1():
         ORDER BY year
    """
    
-    return timeit(spark.sql(query).show)
+    return spark.sql(query)
 
 
 def query2():
@@ -44,7 +43,7 @@ def query2():
         GROUP BY m.mv_id
     """    
    
-    return timeit(spark.sql(query).show)
+    return spark.sql(query)
 
 
 def query3():
@@ -58,7 +57,7 @@ def query3():
         LIMIT 1
     """ 
    
-    return timeit(spark.sql(query).show)
+    return spark.sql(query)
 
 
 def query4():
@@ -77,7 +76,7 @@ def query4():
         ORDER BY year
     """  
    
-    return timeit(spark.sql(query).show)
+    return spark.sql(query)
 
 
 def query5():
@@ -90,4 +89,4 @@ def query5():
         ORDER BY year DESC
     """    
    
-    return timeit(spark.sql(query).show)
+    return spark.sql(query)

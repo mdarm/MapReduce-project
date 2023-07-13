@@ -3,16 +3,16 @@ from pyspark.sql import SparkSession
 from utils import timeit
 
 
-sc = SparkSession \
-      .builder \
-      .appName("RDD API") \
-      .getOrCreate() \
-      .sparkContext
+spark = SparkSession \
+        .builder \
+        .appName("RDD API") \
+        .getOrCreate() \
+        .sparkContext
     
 
-movies_rdd   = sc.textFile("hdfs://master:9000/home/user/files/movies.csv")
-genres_rdd   = sc.textFile("hdfs://master:9000/home/user/files/movie_genres.csv")
-ratings_rdd  = sc.textFile("hdfs://master:9000/home/user/files/ratings.csv")
+movies_rdd   = spark.textFile("hdfs://master:9000/home/user/files/movies.csv")
+genres_rdd   = spark.textFile("hdfs://master:9000/home/user/files/movie_genres.csv")
+ratings_rdd  = spark.textFile("hdfs://master:9000/home/user/files/ratings.csv")
 
 
 def query1():
@@ -24,7 +24,7 @@ def query1():
                        .reduceByKey(lambda v1, v2: v1 + ", " + v2) \
                        .sortBy(lambda pair: pair[0])
     
-    return timeit(movies.collect)
+    return movies
 
 
 def query2():
@@ -46,7 +46,7 @@ def query2():
     movie_stats = union.groupByKey() \
                        .flatMap(lambda kv: [(kv[0], m[1], m[2]) for m in kv[1] if m[0] == 'ratings' for g in kv[1] if g[0] == 'movies'])
 
-    return timeit(movie_stats.collect)
+    return movie_stats
 
 
 def query3():
@@ -97,7 +97,7 @@ def query4():
                        .reduceByKey(lambda x, y: x if x[1] > y[1] else y) \
                        .sortBy(lambda pair: pair[0])
     
-    return timeit(best_comedy.collect)
+    return best_comedy
 
 
 def query5():
@@ -110,4 +110,4 @@ def query5():
                               .map(lambda fields: (fields[0], fields[1][0] / fields[1][1])) \
                               .sortBy(lambda pair: pair[0])
 
-    return timeit(mapped_movies.collect)
+    return mapped_movies
