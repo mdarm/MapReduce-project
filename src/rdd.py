@@ -1,4 +1,4 @@
-# rdd_api.py
+# Rdd_api.py
 from pyspark.sql import SparkSession
 from utils import timeit
 
@@ -16,11 +16,13 @@ ratings_rdd  = sc.textFile("hdfs://master:9000/home/user/files/ratings.csv")
 
 
 def query1():
-    movies = movies_rdd.map(lambda row: row.split(',')) \
-                       .filter(lambda att: len(att) > 7 and att[3].isdigit() and att[6].isdigit() and att[5].isdigit()) \
-                       .map(lambda att: (int(att[3]), (int(att[6]), int(att[5])))) \
-                       .filter(lambda att: att[0] > 1995 and att[1][0] > 0 and att[1][1] > 0) \
-                       .map(lambda att: (att[0], str(att[1][0] - att[1][1]))) \
+    # Get the difference betwen revenue and production cost (i.e. profits) of every
+    # movie after 1995 
+    movies = movies_rdd.map(lambda line: line.split(',')) \
+                       .filter(lambda field: len(field) > 7 and field[3].isdigit() and field[6].isdigit() and field[5].isdigit()) \
+                       .map(lambda field: (int(field[3]), (int(field[6]), int(field[5])))) \
+                       .filter(lambda field: field[0] > 1995 and field[1][0] > 0 and field[1][1] > 0) \
+                       .map(lambda field: (field[0], str(field[1][0] - field[1][1]))) \
                        .reduceByKey(lambda v1, v2: v1 + ", " + v2) \
                        .sortBy(lambda pair: pair[0])
     
@@ -28,8 +30,8 @@ def query1():
 
 
 def query2():
-    # Extract the movie_id from movies' RDD and use it to get the needed fields
-    # from the ratings' RDD
+    # Get the movie id, the average rating and the total number of ratings for the
+    # movie “Cesare deve morire”
     mapped_movies = movies_rdd.map(lambda line: line.split(',')) \
                               .filter(lambda fields: len(fields) == 8 and fields[3].isdigit() and fields[6].isdigit()) \
                               .filter(lambda fields: fields[1] == "Cesare deve morire") \
@@ -50,8 +52,7 @@ def query2():
 
 
 def query3():
-    # Extract the needed fields from movies and genres RDDs, and filter invalid
-    # and irrelevant records
+    # Get the best Animation movie in terms of revenue for 1995
     mapped_movies = movies_rdd.map(lambda line: line.split(',')) \
                               .filter(lambda fields: len(fields) == 8 and fields[3].isdigit() and fields[6].isdigit()) \
                               .filter(lambda fields: int(fields[3]) == 1995 and int(fields[5]) > 0 and int(fields[6]) > 0) \
@@ -76,13 +77,12 @@ def query3():
 
 
 def query4():
-    # Parse and filter the movies RDD
+    # Get the most popular Comedy movie for each year after 1995
     mapped_movies = movies_rdd.map(lambda line: line.split(',')) \
                               .filter(lambda field: len(field) == 8 and field[3].isdigit() and field[6].isdigit()) \
                               .filter(lambda field: int(field[3]) > 1995 and float(field[7]) > 0) \
                               .map(lambda field: (int(field[0]), ('movies', int(field[3]), field[1], float(field[7]))))
 
-    # Parse and filter the genres RDD
     mapped_genres = genres_rdd.map(lambda line: line.split(',')) \
                               .filter(lambda field: len(field) == 2 and field[0].isdigit()) \
                               .filter(lambda field: field[1] == 'Comedy') \
@@ -101,7 +101,7 @@ def query4():
 
 
 def query5():
-    # Extract the needed fields from movies RDD
+    # Get the average revenue for each year
     mapped_movies = movies_rdd.map(lambda line: line.split(',')) \
                               .filter(lambda fields: len(fields) == 8 and fields[3].isdigit() and fields[6].isdigit()) \
                               .filter(lambda fields: int(fields[3]) > 0 and int(fields[6]) > 0) \
