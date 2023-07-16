@@ -16,7 +16,7 @@ def timeit(func, spark, *args, **kwargs):
     Returns:
         tuple: A tuple containing the list of execution times and the result of the last function call.
     """
-    runs = 90 
+    runs = 4 
     times = []
 
     for i in range(runs):
