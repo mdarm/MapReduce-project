@@ -1,18 +1,17 @@
-# Rdd_api.py
 from pyspark.sql import SparkSession
 from utils import timeit
 
 
-sc = SparkSession \
-      .builder \
-      .appName("RDD API") \
-      .getOrCreate() \
-      .sparkContext
-    
+spark = SparkSession \
+          .builder \
+          .appName("RDD API") \
+          .getOrCreate() \
+          .sparkContext
 
-movies_rdd   = sc.textFile("hdfs://master:9000/home/user/files/movies.csv")
-genres_rdd   = sc.textFile("hdfs://master:9000/home/user/files/movie_genres.csv")
-ratings_rdd  = sc.textFile("hdfs://master:9000/home/user/files/ratings.csv")
+
+movies_rdd   = spark.textFile("hdfs://master:9000/home/user/files/movies.csv")
+genres_rdd   = spark.textFile("hdfs://master:9000/home/user/files/movie_genres.csv")
+ratings_rdd  = spark.textFile("hdfs://master:9000/home/user/files/ratings.csv")
 
 
 def query1():
