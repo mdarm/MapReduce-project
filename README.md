@@ -13,7 +13,7 @@ This project focuses on working with big data using PySpark. It involves executi
         - [x] Save query execution-times 
         - [ ] Save query-output
     - [ ] Part 2
-        - [ ] Task 1 
+        - [x] Task 1 
         - [ ] Task 2
 - [ ] **Putting it all together**
     - [ ] Complete writing the report
