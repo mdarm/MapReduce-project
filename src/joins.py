@@ -55,7 +55,7 @@ def broadcast_join(spark):
     dep_dict = {field[0]: field[1] for field in departments_rdd.collect()}
 
     # Broadcast the department data
-    dep_broadcast = spark.sparkContext.broadcast(dep_dict)
+    dep_broadcast = spark.broadcast(dep_dict)
 
     def map_func(field):
         # Extract the join key (department ID) and the department name using
