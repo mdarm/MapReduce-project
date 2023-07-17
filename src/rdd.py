@@ -1,20 +1,18 @@
-from pyspark.sql import SparkSession
 from utils import timeit
 
 
-spark = SparkSession \
-          .builder \
-          .appName("RDD API") \
-          .getOrCreate() \
-          .sparkContext
+def create_rdd(spark):
+    movies_rdd   = spark.textFile("hdfs://master:9000/home/user/files/movies.csv")
+    ratings_rdd  = spark.textFile("hdfs://master:9000/home/user/files/ratings.csv")
+    genres_rdd   = spark.textFile("hdfs://master:9000/home/user/files/movie_genres.csv")
+
+    return movies_rdd, ratings_rdd, genres_rdd
 
 
-movies_rdd   = spark.textFile("hdfs://master:9000/home/user/files/movies.csv")
-genres_rdd   = spark.textFile("hdfs://master:9000/home/user/files/movie_genres.csv")
-ratings_rdd  = spark.textFile("hdfs://master:9000/home/user/files/ratings.csv")
+def query1(spark):
+    # Fetch initial RDD from a csv
+    movies_rdd, _, _ = create_rdd(spark)
 
-
-def query1():
     # Get the difference betwen revenue and production cost (i.e. profits) of every
     # movie after 1995 
     movies = movies_rdd.map(lambda line: line.split(',')) \
@@ -28,7 +26,10 @@ def query1():
     return timeit(movies.collect)
 
 
-def query2():
+def query2(spark):
+    # Fetch initial RDDs from the csv files
+    movies_rdd, ratings_rdd, _ = create_rdd(spark)
+
     # Get the movie id, the average rating and the total number of ratings for the
     # movie “Cesare deve morire”
     mapped_movies = movies_rdd.map(lambda line: line.split(',')) \
@@ -50,7 +51,10 @@ def query2():
     return timeit(movie_stats.collect)
 
 
-def query3():
+def query3(spark):
+    # Fetch initial RDDs from the csv files
+    movies_rdd, _, genres_rdd = create_rdd(spark)
+
     # Get the best Animation movie in terms of revenue for 1995
     mapped_movies = movies_rdd.map(lambda line: line.split(',')) \
                               .filter(lambda fields: len(fields) == 8 and fields[3].isdigit() and fields[6].isdigit()) \
@@ -67,15 +71,17 @@ def query3():
     # Group by key and transform the result
     joined = union.groupByKey() \
                   .flatMap(lambda kv: [(m[1], m[2]) for m in kv[1] if m[0] == 'movies' for g in kv[1] if g[0] == 'genres'])
-    
-    time_taken, best_animation_movie = timeit(joined.reduce, lambda movie, next_movie: movie if movie[1] > next_movie[1] else next_movie)
 
-    #time_taken, best_animation_movie = timeit(joined.reduce(lambda movie, next_movie: movie if movie[1] > next_movie[1] else next_movie))
+    # Action takes place through the joined(), so the timeit() function is placed accordingly    
+    time_taken, best_animation_movie = timeit(joined.reduce, lambda movie, next_movie: movie if movie[1] > next_movie[1] else next_movie)
 
     return time_taken, best_animation_movie 
 
 
-def query4():
+def query4(spark):
+    # Fetch initial RDDs from the csv files
+    movies_rdd, _, genres_rdd = create_rdd(spark)
+
     # Get the most popular Comedy movie for each year after 1995
     mapped_movies = movies_rdd.map(lambda line: line.split(',')) \
                               .filter(lambda field: len(field) == 8 and field[3].isdigit() and field[6].isdigit()) \
@@ -99,7 +105,10 @@ def query4():
     return timeit(best_comedy.collect)
 
 
-def query5():
+def query5(spark):
+    # Fetch initial RDD from a csv
+    movies_rdd, _, _ = create_rdd(spark)
+
     # Get the average revenue for each year
     mapped_movies = movies_rdd.map(lambda line: line.split(',')) \
                               .filter(lambda fields: len(fields) == 8 and fields[3].isdigit() and fields[6].isdigit()) \

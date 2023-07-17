@@ -1,27 +1,23 @@
-# sql_parquet_api.py
-from pyspark.sql import SparkSession
 from pyspark.sql.functions import collect_list
 from utils import timeit
 
 
-spark = SparkSession \
-    .builder \
-    .appName("Dataframe API using Parquet files") \
-    .getOrCreate()
+def create_temp_tables(spark):
+    # Fetch data
+    movies_df = spark.read.parquet("hdfs://master:9000/home/user/files/movies.parquet")
+    ratings_df = spark.read.parquet("hdfs://master:9000/home/user/files/ratings.parquet")
+    genres_df = spark.read.parquet("hdfs://master:9000/home/user/files/movie_genres.parquet")
+
+    # Create temporary relations
+    movies_df.createOrReplaceTempView("movies")
+    ratings_df.createOrReplaceTempView("ratings")
+    genres_df.createOrReplaceTempView("genres")
 
 
-# Fetch data
-movies_df = spark.read.parquet("hdfs://master:9000/home/user/files/movies.parquet")
-ratings_df = spark.read.parquet("hdfs://master:9000/home/user/files/ratings.parquet")
-genres_df = spark.read.parquet("hdfs://master:9000/home/user/files/movie_genres.parquet")
+def query1(spark):
+    # Fetch relations
+    create_temp_tables(spark)
 
-# Create temporary relations
-movies_df.createOrReplaceTempView("movies")
-ratings_df.createOrReplaceTempView("ratings")
-genres_df.createOrReplaceTempView("genres")
-
-
-def query1():
     # Get the difference betwen revenue and production cost (i.e. profits) of every movie after 1995
     query = """
         SELECT year, concat_ws(',', collect_list(cast((revenue - prod_cost) AS string))) AS profit
@@ -34,7 +30,10 @@ def query1():
     return timeit(spark.sql(query).show)
 
 
-def query2():
+def query2(spark):
+    # Fetch relations
+    create_temp_tables(spark)
+
     # Get the movie id, the average rating and the total number of ratings for the movie “Cesare deve morire”
     query = """
         SELECT m.mv_id, COUNT(r.usr_id) AS user_count, AVG(r.rating) AS average_rating
@@ -47,7 +46,10 @@ def query2():
     return timeit(spark.sql(query).show)
 
 
-def query3():
+def query3(spark):
+    # Fetch relations
+    create_temp_tables(spark)
+
     # Get the best Animation movie in terms of revenue for 1995
     query = """
         SELECT m.name AS movie_name, m.revenue AS revenue
@@ -61,7 +63,10 @@ def query3():
     return timeit(spark.sql(query).show)
 
 
-def query4():
+def query4(spark):
+    # Fetch relations
+    create_temp_tables(spark)
+
     # Get the most popular Comedy movie for each year after 1995
     query = """
         WITH ranked_movies AS (
@@ -80,7 +85,10 @@ def query4():
     return timeit(spark.sql(query).show)
 
 
-def query5():
+def query5(spark):
+    # Fetch relations
+    create_temp_tables(spark)
+
     # Get the average revenue for each year
     query = """
         SELECT year, AVG(revenue) AS avg_revenue
