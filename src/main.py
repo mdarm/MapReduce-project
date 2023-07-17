@@ -1,3 +1,6 @@
+# Import SparkSession
+from pyspark.sql import SparkSession
+
 # Import RDD queries 
 from rdd import query1 as rdd_query1
 from rdd import query2 as rdd_query2
@@ -22,8 +25,6 @@ from sql_parquet import query5 as sql_parquet_query5
 # Import csv-to-parquet converter
 from csv_to_parquet import convert_csv_to_parquet
 
-# Import necessary functions
-from utils import timeit, calculate_average, calculate_error_margin
 
 def part_1():
     # Convert CSVs to Parquet (Task 1)
@@ -33,21 +34,31 @@ def part_1():
 
     # Calculate execution times for each query (Tasks 2, 3 & 4)
     for i in range(1, 6):
-        rdd_query_name = 'rdd_query%s' % (i)
+        spark = SparkSession \
+                .builder \
+                .appName("All-use session") \
+                .getOrCreate()
+        sc = spark.sparkContext
+
+        rdd_query_name     = 'rdd_query%s' % (i)
         parquet_query_name = 'sql_parquet_query%s' % (i)
-        csv_query_name = 'sql_csv_query%s' % (i)
-        times[rdd_query_name], _ = globals()[rdd_query_name]()
-        times[parquet_query_name], _ = globals()[parquet_query_name]()
-        times[csv_query_name], _ = globals()[csv_query_name]()
+        csv_query_name     = 'sql_csv_query%s' % (i)
+        
+        times[rdd_query_name], _     = globals()[rdd_query_name](sc)
+        times[parquet_query_name], _ = globals()[parquet_query_name](spark)
+        times[csv_query_name], _     = globals()[csv_query_name](spark)
+
+        # Consistency in execution times
+        spark.stop()
+        sc.stop()
         print(times)
 
-    # Compute averages and error margins and write to a text file
+    # Compute execution times and write to a text file
     with open('../output/part_1_times.txt', 'w') as f:
-        for query, time_list in times.items():
-            avg_time = calculate_average(time_list)
-            error_margin = calculate_error_margin(time_list, avg_time)
-            f.write('%s: %.4f (+-%.4f) seconds\n' % (query, avg_time, error_margin))
+        for query, execution_time in times.items():
+            f.write('%s: %.2f seconds\n' % (query, execution_time))
 
 
 if __name__ == "__main__":
     part_1()
+
