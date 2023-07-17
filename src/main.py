@@ -26,13 +26,21 @@ from sql_parquet import query5 as sql_parquet_query5
 from joins import broadcast_join
 from joins import repartition_join
 
+# Import Optimiser script
+from optimiser import use_optimiser
+
 # Import csv-to-parquet converter
 from csv_to_parquet import convert_csv_to_parquet
 
 
 def part_1():
-    # Convert CSVs to Parquet (Task 1)
+
+    ###################### Task 1 ######################
+    # Convert CSVs to Parquet 
     #convert_csv_to_parquet()
+
+
+    ################## Tasks 2, 3 & 4  ##################
 
     times = {}
 
@@ -65,6 +73,7 @@ def part_1():
 
 def part2():
 
+    ###################### Task 1 ######################
     times = {}
 
     spark = SparkSession \
@@ -73,13 +82,46 @@ def part2():
                 .getOrCreate() \
                 .sparkContext
 
-    times['Broadcast Join'], _     = globals()[broadcast_join](spark)
-    times['Repartition Join'], _   = globals()[repartition_join](spark)
+    times['Broadcast Join'], broadcast_result = broadcast_join(spark)
+    times['Repartition Join'], _              = repartition_join(spark)
 
     # Compute execution times and write to a text file
     with open('../output/join_type_times.txt', 'w') as f:
         for query, execution_time in times.items():
             f.write('%s: %.2f seconds\n' % (query, execution_time))
+            
+    # Save the result to text files
+    with open('../output/join_outputs.txt', 'w') as f:
+        for result in broadcast_result:
+            f.write(str(result) + '\n')
+
+    # Consistency in execution times
+    spark.stop()
+
+
+    ###################### Task 2 ######################
+    times = {}
+        
+    spark = SparkSession \
+            .builder \
+            .appName('Using Catalyst') \
+            .getOrCreate()
+
+    times["Using Catalyst"], with_catalyst = use_optimiser(spark)
+    times["Without using Catalyst"], without_catalyst = use_optimiser(spark, disabled="Y")
+
+    # Compute execution times and write to a text file
+    with open('../output/catalyst_times.txt', 'w') as f:
+        for query, execution_time in times.items():
+            f.write('%s: %.2f seconds\n' % (query, execution_time[0]))
+            
+    # Save the result to text files
+    with open('../output/optimised_plan.txt', 'w') as f:
+        f.write(with_catalyst)
+
+    # Save the result to text files
+    with open('../output/non_optimised_plan.txt', 'w') as f:
+        f.write(without_catalyst)
 
 
 if __name__ == "__main__":
