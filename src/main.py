@@ -22,6 +22,10 @@ from sql_parquet import query3 as sql_parquet_query3
 from sql_parquet import query4 as sql_parquet_query4
 from sql_parquet import query5 as sql_parquet_query5
 
+# Import RDD joins
+from joins import broadcast_join
+from joins import repartition_join
+
 # Import csv-to-parquet converter
 from csv_to_parquet import convert_csv_to_parquet
 
@@ -59,6 +63,24 @@ def part_1():
             f.write('%s: %.2f seconds\n' % (query, execution_time))
 
 
-if __name__ == "__main__":
-    part_1()
+def part2():
 
+    times = {}
+
+    spark = SparkSession \
+                .builder \
+                .appName("All-use session") \
+                .getOrCreate() \
+                .sparkContext
+
+    times['Broadcast Join'], _     = globals()[broadcast_join](spark)
+    times['Repartition Join'], _   = globals()[repartition_join](spark)
+
+    # Compute execution times and write to a text file
+    with open('../output/join_type_times.txt', 'w') as f:
+        for query, execution_time in times.items():
+            f.write('%s: %.2f seconds\n' % (query, execution_time))
+
+
+if __name__ == "__main__":
+    part2()

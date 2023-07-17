@@ -1,19 +1,17 @@
-from pyspark.sql import SparkSession
 from utils import timeit
 
 
-spark = SparkSession \
-          .builder \
-          .appName("RDD API") \
-          .getOrCreate() \
-          .sparkContext
+def create_rdd(spark):
+    employees   = spark.textFile("hdfs://master:9000/home/user/files/employeesR.csv")
+    departments = spark.textFile("hdfs://master:9000/home/user/files/departmentsR.csv")
+
+    return employees, departments
 
 
-employees   = spark.textFile("hdfs://master:9000/home/user/files/employeesR.csv")
-departments = spark.textFile("hdfs://master:9000/home/user/files/departmentsR.csv")
+def repartition_join(spark):
+    # Fetch RDDs from the csv files
+    employees, departments = create_rdd(spark)
 
-
-def repartition_join():
     # Tag RDDs
     employees_tagged = employees \
                          .map(lambda line: line.split(',')) \
@@ -41,7 +39,10 @@ def repartition_join():
     return timeit(joined_rdd.collect)
 
 
-def broadcast_join():
+def broadcast_join(spark):
+    # Fetch RDDs from the csv files
+    employees, departments = create_rdd(spark)
+
     employees_rdd = employees \
                       .map(lambda line: line.split(',')) \
                       .map(lambda field: (int(field[0]), field[1], int(field[2])))
