@@ -36,7 +36,7 @@ from csv_to_parquet import convert_csv_to_parquet
 def part1():
     ###################### Task 1 ######################
     # Convert CSVs to Parquet 
-    #convert_csv_to_parquet()
+    convert_csv_to_parquet()
 
 
     ################## Tasks 2, 3 & 4  ##################
