@@ -1,15 +1,16 @@
 import io
-import sys
 import contextlib
 from utils import timeit
 
 
 def create_temp_tables(spark):
-    df = spark.read.format("parquet")
-    df1 = df.load("hdfs://master:9000/home/user/files/ratings.parquet") 
-    df2 = df.load("hdfs://master:9000/home/user/files/movie_genres.parquet") 
-    df1.registerTempTable("ratings") 
-    df2.registerTempTable("genres")
+    dataframe = spark.read.format("parquet")
+
+    ratings_dataframe = dataframe.load("hdfs://master:9000/home/user/files/ratings.parquet")
+    genres_dataframe = dataframe.load("hdfs://master:9000/home/user/files/movie_genres.parquet") 
+
+    ratings_dataframe.registerTempTable("ratings") 
+    genres_dataframe.registerTempTable("genres")
 
 
 def use_optimiser(spark, disabled = "N"):
