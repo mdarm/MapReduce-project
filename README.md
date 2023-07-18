@@ -7,14 +7,14 @@ This project focuses on working with big data using PySpark. It involves executi
 ---
 ## In Progress && To-Do
 
-- [ ] **Implementations**
-    - [ ] Part 1
+- [x] **Implementations**
+    - [x] Part 1
         - [x] Implementation
         - [x] Save query execution-times 
-        - [ ] Save query-output
-    - [ ] Part 2
+        - [x] Save query-output
+    - [x] Part 2
         - [x] Join types
-        - [ ] SQL optimiser
+        - [x] SQL optimiser
 - [ ] **Putting it all together**
     - [ ] Complete writing the report
         - [x] Finish first draft
