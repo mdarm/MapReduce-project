@@ -1,4 +1,7 @@
+import io
 import time
+import contextlib
+
 
 def timeit(func, *args, **kwargs):
     """
@@ -18,3 +21,28 @@ def timeit(func, *args, **kwargs):
     execution_time = end - start
 
     return execution_time, result
+
+
+def save_dataframe_output(dataframe):
+    """
+    Function to capture and return the complete output of a PySpark DataFrame.
+
+    Parameters:
+        dataframe (pyspark.sql.DataFrame): The DataFrame whose output is to be captured.
+
+    Returns:
+        str: The entire output of the DataFrame as a string.
+    """
+    
+    # Calculate the number of rows in the DataFrame
+    row_count = dataframe.count()
+
+    # Create a StringIO object
+    stdout = io.StringIO()
+
+    # Execute show() on DataFrame and capture the output
+    with contextlib.redirect_stdout(stdout):
+        dataframe.show(n=row_count, truncate=False)
+
+    # Get the captured standard output
+    return stdout.getvalue()
