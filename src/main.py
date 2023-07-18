@@ -33,15 +33,13 @@ from optimiser import use_optimiser
 from csv_to_parquet import convert_csv_to_parquet
 
 
-def part_1():
-
+def part1():
     ###################### Task 1 ######################
     # Convert CSVs to Parquet 
     #convert_csv_to_parquet()
 
 
     ################## Tasks 2, 3 & 4  ##################
-
     times = {}
 
     # Calculate execution times for each query (Tasks 2, 3 & 4)
@@ -58,7 +56,11 @@ def part_1():
         
         times[rdd_query_name], _     = globals()[rdd_query_name](sc)
         times[parquet_query_name], _ = globals()[parquet_query_name](spark)
-        times[csv_query_name], _     = globals()[csv_query_name](spark)
+        times[csv_query_name], query_output     = globals()[csv_query_name](spark)
+
+        # Save the query-output, in dataframe format, on a text file 
+        with open('../output/Q%sDF.txt' % i, 'w') as f:
+            f.write(query_output)
 
         # Consistency in execution times
         spark.stop()
@@ -69,10 +71,9 @@ def part_1():
     with open('../output/part_1_times.txt', 'w') as f:
         for query, execution_time in times.items():
             f.write('%s: %.2f seconds\n' % (query, execution_time))
-
+    
 
 def part2():
-
     ###################### Task 1 ######################
     times = {}
 
@@ -110,19 +111,22 @@ def part2():
     times["Using Catalyst"], with_catalyst = use_optimiser(spark)
     times["Without using Catalyst"], without_catalyst = use_optimiser(spark, disabled="Y")
 
+    spark.stop()
+
     # Compute execution times and write to a text file
     with open('../output/catalyst_times.txt', 'w') as f:
         for query, execution_time in times.items():
             f.write('%s: %.2f seconds\n' % (query, execution_time[0]))
             
-    # Save the result to text files
+    # Save the optimised query plan to text file
     with open('../output/optimised_plan.txt', 'w') as f:
         f.write(with_catalyst)
 
-    # Save the result to text files
+    # Save the non-optimised query plan to text file 
     with open('../output/non_optimised_plan.txt', 'w') as f:
         f.write(without_catalyst)
 
 
 if __name__ == "__main__":
+    part1()
     part2()
