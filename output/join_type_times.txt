@@ -1,0 +1,2 @@
+Broadcast Join: 2.22 seconds
+Repartition Join: 3.22 seconds

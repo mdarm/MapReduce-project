@@ -1,0 +1,14 @@
+== Physical Plan ==
+*(6) SortMergeJoin [mv_id#670], [mv_id#663], Inner
+:- *(3) Sort [mv_id#670 ASC NULLS FIRST], false, 0
+:  +- Exchange hashpartitioning(mv_id#670, 200)
+:     +- *(2) Filter isnotnull(mv_id#670)
+:        +- *(2) GlobalLimit 100
+:           +- Exchange SinglePartition
+:              +- *(1) LocalLimit 100
+:                 +- *(1) FileScan parquet [mv_id#670,genre#671] Batched: true, Format: Parquet, Location: InMemoryFileIndex[hdfs://master:9000/home/user/files/movie_genres.parquet], PartitionFilters: [], PushedFilters: [], ReadSchema: struct<mv_id:int,genre:string>
++- *(5) Sort [mv_id#663 ASC NULLS FIRST], false, 0
+   +- Exchange hashpartitioning(mv_id#663, 200)
+      +- *(4) Project [usr_id#662, mv_id#663, rating#664, time_stamp#665]
+         +- *(4) Filter isnotnull(mv_id#663)
+            +- *(4) FileScan parquet [usr_id#662,mv_id#663,rating#664,time_stamp#665] Batched: true, Format: Parquet, Location: InMemoryFileIndex[hdfs://master:9000/home/user/files/ratings.parquet], PartitionFilters: [], PushedFilters: [IsNotNull(mv_id)], ReadSchema: struct<usr_id:int,mv_id:int,rating:float,time_stamp:int>
