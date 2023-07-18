@@ -1,6 +1,6 @@
 from pyspark.sql.functions import collect_list
 from pyspark.sql.types import StructField, StructType, IntegerType, FloatType, StringType
-from utils import timeit
+from utils import timeit, save_dataframe_output
 
 
 # Set schemas of csv files
@@ -63,8 +63,11 @@ def query1(spark):
         GROUP BY year
         ORDER BY year
    """
-   
-    return timeit(spark.sql(query).show)
+    
+    execution_time, _ = timeit(spark.sql(query).show)
+    query_output = save_dataframe_output(spark.sql(query))
+
+    return execution_time, query_output
 
 
 def query2(spark):
@@ -79,8 +82,11 @@ def query2(spark):
         WHERE m.name = 'Cesare deve morire'
         GROUP BY m.mv_id
     """    
-   
-    return timeit(spark.sql(query).show)
+
+    execution_time, _ = timeit(spark.sql(query).show)
+    query_output = save_dataframe_output(spark.sql(query))
+
+    return execution_time, query_output
 
 
 def query3(spark):
@@ -96,8 +102,10 @@ def query3(spark):
         ORDER BY m.revenue DESC
         LIMIT 1
     """ 
-   
-    return timeit(spark.sql(query).show)
+    execution_time, _ = timeit(spark.sql(query).show)
+    query_output = save_dataframe_output(spark.sql(query))
+
+    return execution_time, query_output
 
 
 def query4(spark):
@@ -118,8 +126,11 @@ def query4(spark):
         WHERE rank = 1
         ORDER BY year
     """  
-   
-    return timeit(spark.sql(query).show)
+
+    execution_time, _ = timeit(spark.sql(query).show)
+    query_output = save_dataframe_output(spark.sql(query))
+
+    return execution_time, query_output
 
 
 def query5(spark):
@@ -134,5 +145,8 @@ def query5(spark):
         GROUP BY year
         ORDER BY year DESC
     """    
-   
-    return timeit(spark.sql(query).show)
+
+    execution_time, _ = timeit(spark.sql(query).show)
+    query_output = save_dataframe_output(spark.sql(query))
+
+    return execution_time, query_output
