@@ -22,8 +22,14 @@ def query1(spark):
                        .map(lambda field: (field[0], str(field[1][0] - field[1][1]))) \
                        .reduceByKey(lambda v1, v2: v1 + ", " + v2) \
                        .sortBy(lambda pair: pair[0])
-    
-    return timeit(movies.collect)
+   
+    execution_time, result = timeit(movies.collect)
+
+    with open('../output/rdd_results/Q1RDD.txt', 'w') as f:
+        for year, movie in result:
+            f.write("year %s, profits [%s]\n" % (year, movie)) 
+
+    return execution_time
 
 
 def query2(spark):
@@ -48,7 +54,13 @@ def query2(spark):
     movie_stats = union.groupByKey() \
                        .flatMap(lambda kv: [(kv[0], m[1], m[2]) for m in kv[1] if m[0] == 'ratings' for g in kv[1] if g[0] == 'movies'])
 
-    return timeit(movie_stats.collect)
+    execution_time, stats = timeit(movie_stats.collect)
+
+         
+    with open('../output/rdd_results/Q2RDD.txt', 'w') as f:
+        f.write("Movie ID: %i, Number of ratings: %i, Average rating: %.2f" % (stats[0][0], stats[0][2], stats[0][1]))
+
+    return execution_time
 
 
 def query3(spark):
@@ -73,9 +85,12 @@ def query3(spark):
                   .flatMap(lambda kv: [(m[1], m[2]) for m in kv[1] if m[0] == 'movies' for g in kv[1] if g[0] == 'genres'])
 
     # Action takes place through the joined(), so the timeit() function is placed accordingly    
-    time_taken, best_animation_movie = timeit(joined.reduce, lambda movie, next_movie: movie if movie[1] > next_movie[1] else next_movie)
+    execution_time, best_animation_movie = timeit(joined.reduce, lambda movie, next_movie: movie if movie[1] > next_movie[1] else next_movie)
 
-    return time_taken, best_animation_movie 
+    with open('../output/rdd_results/Q3RDD.txt', 'w') as f:
+        f.write("Best Animation Movie of 1995: {}, Revenue: {}".format(best_animation_movie[0], best_animation_movie[1]))
+
+    return execution_time 
 
 
 def query4(spark):
@@ -102,7 +117,13 @@ def query4(spark):
                        .reduceByKey(lambda x, y: x if x[1] > y[1] else y) \
                        .sortBy(lambda pair: pair[0])
     
-    return timeit(best_comedy.collect)
+    execution_time, best_comedy = timeit(best_comedy.collect)
+
+    with open('../output/rdd_results/Q4RDD.txt', 'w') as f:
+        for movie in best_comedy:
+            f.write("The most popular Comedy of %i was %s, with a popularity score of %.2f\n" % (movie[0], movie[1][0], movie[1][1]))
+
+    return execution_time
 
 
 def query5(spark):
@@ -118,4 +139,10 @@ def query5(spark):
                               .map(lambda fields: (fields[0], fields[1][0] / fields[1][1])) \
                               .sortBy(lambda pair: pair[0])
 
-    return timeit(mapped_movies.collect)
+    execution_time, results = timeit(mapped_movies.collect)
+
+    with open('../output/rdd_results/Q5RDD.txt', 'w') as f:
+        for result in results:
+            f.write("Year %i had an average movie revenue of %.2f\n" % (result[0], result[1]))
+
+    return execution_time
