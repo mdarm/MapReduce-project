@@ -1,2 +1,2 @@
-Without using Catalyst: 11.83 seconds
-Using Catalyst: 3.85 seconds
+Without using Catalyst: 8.99 seconds
+Using Catalyst: 3.20 seconds
