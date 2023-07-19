@@ -36,7 +36,7 @@ from csv_to_parquet import convert_csv_to_parquet
 def part1():
     ###################### Task 1 ######################
     # Convert CSVs to Parquet 
-    #convert_csv_to_parquet()
+    convert_csv_to_parquet()
 
 
     ################## Tasks 2, 3 & 4  ##################
@@ -54,12 +54,12 @@ def part1():
         parquet_query_name = 'sql_parquet_query%s' % (i)
         csv_query_name     = 'sql_csv_query%s' % (i)
         
-        times[rdd_query_name], _     = globals()[rdd_query_name](sc)
-        times[parquet_query_name], _ = globals()[parquet_query_name](spark)
-        times[csv_query_name], query_output     = globals()[csv_query_name](spark)
+        times[rdd_query_name]               = globals()[rdd_query_name](sc)
+        times[parquet_query_name], _        = globals()[parquet_query_name](spark)
+        times[csv_query_name], query_output = globals()[csv_query_name](spark)
 
         # Save the query-output, in dataframe format, on a text file 
-        with open('../output/Q%sDF.txt' % i, 'w') as f:
+        with open('../output/df_results/Q%sDF.txt' % i, 'w') as f:
             f.write(query_output)
 
         # Consistency in execution times
@@ -112,7 +112,7 @@ def part2():
             .getOrCreate()
     sc = spark
 
-    times["Using Catalyst"], with_catalyst = use_optimiser(spark)
+    times["Using Catalyst"], with_catalyst            = use_optimiser(spark)
     times["Without using Catalyst"], without_catalyst = use_optimiser(sc, disabled="Y")
 
     spark.stop()
