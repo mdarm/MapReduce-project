@@ -35,7 +35,8 @@ from csv_to_parquet import convert_csv_to_parquet
 
 def part1():
     ###################### Task 1 ######################
-    # Convert CSVs to Parquet 
+    # Convert CSVs to Parquet; run only once. Should you
+    # wish to repeat the process, comment it out.
     convert_csv_to_parquet()
 
 
