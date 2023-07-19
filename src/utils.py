@@ -27,7 +27,7 @@ def save_dataframe_output(dataframe):
     """
     Function to capture and return the complete output of a PySpark DataFrame.
 
-    Parameters:
+    Args:
         dataframe (pyspark.sql.DataFrame): The DataFrame whose output is to be captured.
 
     Returns:
