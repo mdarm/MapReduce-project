@@ -36,7 +36,7 @@ from csv_to_parquet import convert_csv_to_parquet
 def part1():
     ###################### Task 1 ######################
     # Convert CSVs to Parquet 
-    convert_csv_to_parquet()
+    #convert_csv_to_parquet()
 
 
     ################## Tasks 2, 3 & 4  ##################
@@ -102,16 +102,21 @@ def part2():
 
     ###################### Task 2 ######################
     times = {}
-        
+
+    # Two instances are created since Spark tends to keep
+    # metadata from each run in order to optimise reading
+    # and calculating future queries.
     spark = SparkSession \
             .builder \
             .appName('Using Catalyst') \
             .getOrCreate()
+    sc = spark
 
     times["Using Catalyst"], with_catalyst = use_optimiser(spark)
-    times["Without using Catalyst"], without_catalyst = use_optimiser(spark, disabled="Y")
+    times["Without using Catalyst"], without_catalyst = use_optimiser(sc, disabled="Y")
 
     spark.stop()
+    sc.stop()
 
     # Compute execution times and write to a text file
     with open('../output/catalyst_times.txt', 'w') as f:
