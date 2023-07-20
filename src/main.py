@@ -37,7 +37,7 @@ def part1():
     ###################### Task 1 ######################
     # Convert CSVs to Parquet; run only once. Should you
     # wish to repeat the process, comment it out.
-    #convert_csv_to_parquet()
+    convert_csv_to_parquet()
 
 
     ################## Tasks 2, 3 & 4  ##################
