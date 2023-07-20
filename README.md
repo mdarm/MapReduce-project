@@ -84,7 +84,7 @@ spark.submit.deployMode client
 spark.executor.instances 2
 spark.executor.cores 1
 spark.executor.memory 512m
-park.driver.memory 1024m
+spark.driver.memory 1024m
 ```
 4. Create the following directory:
 ```bash
@@ -99,3 +99,25 @@ hadoop fs -put *.csv ~/files
 spark-submit main.py
 ```
 For more information about execution results, as well as their interpretation, please read the [report](./report/coursework.pdf).
+
+## Sample Outputs
+
+Query [execution-plan](./output/optimised_plan.txt) when joining two realtions, `departments` and `employees`, on the attribute `department id`.
+```bash
+== Physical Plan ==
+*(3) BroadcastHashJoin [mv_id#627], [mv_id#620], Inner, BuildLeft
+:- BroadcastExchange HashedRelationBroadcastMode(List(cast(input[0, int, false] as bigint)))
+:  +- *(2) Filter isnotnull(mv_id#627)
+:     +- *(2) GlobalLimit 100
+:        +- Exchange SinglePartition
+:           +- *(1) LocalLimit 100
+:              +- *(1) FileScan parquet [mv_id#627,genre#628] Batched: true, Format: Parquet, Location: InMemoryFileIndex[hdfs://master:9000/home/user/files/movie_genres.parquet], PartitionFilters: [], PushedFilters: [], ReadSchema: struct<mv_id:int,genre:string>
++- *(3) Project [usr_id#619, mv_id#620, rating#621, time_stamp#622]
+   +- *(3) Filter isnotnull(mv_id#620)
+      +- *(3) FileScan parquet [usr_id#619,mv_id#620,rating#621,time_stamp#622] Batched: true, Format: Parquet, Location: InMemoryFileIndex[hdfs://master:9000/home/user/files/ratings.parquet], PartitionFilters: [], PushedFilters: [IsNotNull(mv_id)], ReadSchema: struct<usr_id:int,mv_id:int,rating:float,time_stamp:int>
+```
+
+Query execution-times, for all queries, using RDDs, CSVs and Parquet.
+<picture>
+  <img src="output/barplot.svg" alt="Image">
+</picture>
