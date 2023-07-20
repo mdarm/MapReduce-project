@@ -18,15 +18,64 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% Main document
-\section{Introduction}
+\section*{Introduction}
 
-\subsection{}
+The following representation provides a structured overview of the project's directory hierarchy, and can serve as a quick reference to the deliverables and components. This layout details the various output files, source code modules and the report itself.
+
+\begin{minted}[breaklines, breakafter=d]{bash}
+$PROJECT_ROOT
+¦   # Project's outputs
++-- output
+¦   ¦   # Execution times with and without the optimiser
+¦   +-- catalyst_times.txt
+¦   ¦   # Query outputs using the RDD API
+¦   +-- df_results
+¦   ¦   ¦
+¦   ¦   +-- Q1DF.txt
+¦   ¦   +-- Q2DF.txt
+¦   ¦   +-- Q3DF.txt
+¦   ¦   +-- Q4DF.txt
+¦   ¦   +-- Q5DF.txt
+¦   ¦
+¦   +-- join_outputs.txt        # outputs when using broadcast and repartition joins
+¦   +-- join_type_times.txt     # execution times when using broadcast and repartition joins
+¦   +-- non_optimised_plan.txt  # quey plan without using Catalyst
+¦   +-- optimised_plan.txt      # query plan with Catalyst
+¦   +-- part_1_times.txt        # execution times, for every query, for all data types
+¦   +-- coursework.pdf          # project's report
+¦   ¦   # Query outputs using the Dataframe API
+¦   +-- rdd_results
+¦       ¦
+¦       +-- Q1RDD.txt
+¦       +-- Q2RDD.txt
+¦       +-- Q3RDD.txt
+¦       +-- Q4RDD.txt
+¦       +-- Q5RDD.txt
+¦   # Modules for performing all tasks
++-- src
+    ¦
+    +-- csv_to_parquet.py       # converting the csv files to parquet
+    +-- joins.py                # performing broadcast and repartition joins
+    +-- main.py                 # running script; executes required tasks
+    +-- optimiser.py            # enabling and disabling Catalyst
+    +-- rdd.py                  # rdd queries
+    +-- sql_csv.py              # csv queris (SQL-like)
+    +-- sql_parquet.py          # parquet queries (SQL-like)
+    +-- utils.py                # helper functions
+\end{minted}
+
+All of the code (modules in the \texttt{src} files) is also included in Part~\ref{snippets}, at the end of this document. Note that because of Java heap errors, the following modification was made in the \texttt{spark-defaults.conf} file:
+\mint{bash}|spark.driver.memory 1024m|
+
+\section{File Management in HDFS}
+\subsection{Save files in HDFS}
 For creating a \texttt{files} directory in the HDFS, the following command was used
 \mint{bash}|hadoop fs -mkdir -p ~/files|
 \noindent and to populate it with the project's \texttt{.csv} files
 \mint{bash}|hadoop fs -put *.csv ~/files .|
 \noindent Since the only \texttt{.csv} files populating the working directory were the project's ones, it was fairly easy to fetch all of them using \texttt{*.csv}.
-Fig.~\ref{fig:files} shows a print-screen of the \texttt{.csv} files lying within the created \texttt{files} directory.
+
+Figure~\ref{fig:files} shows a print-screen of the \texttt{.csv} files lying within the created \texttt{files} directory.
 
 \begin{figure}[htbp]
     \centering
@@ -35,7 +84,7 @@ Fig.~\ref{fig:files} shows a print-screen of the \texttt{.csv} files lying withi
     \label{fig:files}
 \end{figure}
 
-The same files were then saved in \texttt{.parquet} format, using Snip.~\ref{code:files}, as can be seen in the print-screen of Fig~\ref{fig:files-all}.
+The same files were then saved in \texttt{.parquet} format, using Snippet~\ref{code:files}, as can be seen in the print-screen of Figure~\ref{fig:files-all}.
 
 \begin{figure}[htbp]
     \centering
@@ -44,36 +93,77 @@ The same files were then saved in \texttt{.parquet} format, using Snip.~\ref{cod
     \label{fig:files-all}
 \end{figure}
 
-\section{Basics}
+\subsection{RDD queries}
+All of the RDD queries can be found in the \texttt{rdd.py} module (see Snippet~\ref{code:rdd}). All performed joins, when required, were repartition joins. Below is the execution of query 1: ``Get the difference betwen revenue and production cost (i.e. profits) of every movie after 1995.'' 
 
-\subsection{Repartition and Broadcast Joins}
+\inputminted[breaklines, breakafter=d, linenos, firstline=18, lastline=24]{python}{./code/rdd.py}
 
-\begin{figure}[htb]
+\subsection{Dataframe queries}
+All of the Dataframe queries can be found in the \texttt{sql\textunderscore csv.py} and \texttt{sql\textunderscore parquet.py} modules (see Snippets~\ref{code:sql-csv}~\&~\ref{code:sql-parquet}). Below is the execution of query 1: ``Get the difference betwen revenue and production cost (i.e. profits) of every movie after 1995.''
+
+\inputminted[breaklines, breakafter=d, linenos, firstline=59, lastline=65]{python}{./code/sql_csv.py}
+
+\subsection{Query execution-times}
+
+To ensure the highest precision in measurement-performance, a Spark benchmarking approach was used. For each individual case, a distinct Spark session was instantiated, and after the run, was terminated. This strategy was imperative to prevent data or intermediate computations from being cached, thereby eliminating any potential biases. This guarantees that the analysis is grounded in somewhat representative query execution-times. The results can be seen in Figure~\ref{fig:execution-times}.
+
+\begin{figure}[!htbp]
     \centering
     \input{./plots/barplot}
-    \caption{Caption}
-    \label{fig:enter-label}
+    \caption{Query execution-times, for all queries, using RDDs, CSVs and Parquet.}
+    \label{fig:execution-times}
 \end{figure}
 
+A first look at the results reveals contrasting execution times with regards to the RDDs. \textit{Query 1} was completed in a mere 1.55 seconds, while \textit{queries 4 and 5} in under 1 second. On the other hand, \textit{query 2} lasted 57.27 seconds. This variance can largely be traced back to the nature of the operations and transformations inherent to each query. \textit{Query 2} was largely defined by multiple transformations (like `map', `filter', `union', `flatMap' etc.) and complex computations (like `reduceByKey' and `groupByKey') involving shuffling, which is time-intensive.
+ 
+Furthermore, CSV files must either infer the schema or have it explicitly provided. This schema management can introduce overhead. This is exacerbated for large data sets or complex schema structures. To illustrate: \textit{query 2} took 19.66 seconds, significantly faster than its Parquet counterpart. This behaviour is expected given the inherent row-based orientation of CSVs, which is sub-optimal for Spark's preferred columnar computations. However, in \textit{queries 3, 4 \& 5}, all operations on CSV files outperformed their Parquet counterparts.
+
+Even though Parquet often delivers commendable performance, it's crucial to note that, under situations with limited columnar data operations, or when full-file scans are inevitable, Parquet's performance can fall behind that of CSVs due to the overhead from decompressing and decoding columnar data. A very likely scenario for \textit{queries 3, 4 \& 5}.
+
+\section{Optimised Join Strategies}
+\subsection{Repartition and Broadcast Joins}
+ This part focused on joining two relations, `departments' and `employees', on the `department id' attribute. While there are multiple strategies to do this, two distinct approaches were implemented: the Repartition Join and the Broadcast Join. These operations not only illustrate the diversity in handling data merges but also emphasise the significance of choosing an optimised strategy based on data size and structure. The execution of these joins can be found within the \texttt{joins.py} module (see Snippet~\ref{code:joins}).
+
+\subsubsection{Repartition join}
+This method represents a co-grouping-based join operation. The records from each RDD are tagged with their respective source labels (`employees' or `departments'). By unionising these tagged RDDs, and grouping by their keys, a co-group operation is achieved. After this, the join operation is performed by matching keys, yielding combined records from both employees and departments.
+
+\inputminted[breaklines, breakafter=d, linenos, firstline=11, lastline=39]{python}{./code/joins.py}
+
+\subsubsection{Broadcast join}
+
+In this approach, the join operation leverages Spark's broadcasting capability. A dictionary (or lookup map) is created for the `departments' RDD. This dictionary gets broadcast across the cluster, enabling each node to access it locally. The join is then executed by mapping over the `employees' RDD and fetching the corresponding department name from the broadcasted dictionary using the department ID. This technique benefits from reduced data shuffling, particularly when one of the datasets (like `departments') is considerably smaller than the other.
+
+\inputminted[breaklines, breakafter=d, linenos, firstline=42, lastline=71]{python}{./code/joins.py}
+
 \subsection{Tweaking the Catalyst Optimiser}
+
+Running a query with, and without, the Catalyst optimiser is performed in the \texttt{optimiser.py} module (see Snippet~\ref{code:optimiser}). Figure~\ref{fig:optimiser} shows the execution times for the following query:
+
+\begin{minted}[breaklines, breakafter=d]{sql}
+query = """
+        SELECT *
+        FROM (SELECT * FROM genres LIMIT 100) AS g, ratings AS r
+        WHERE r.mv_id = g.mv_id
+"""
+\end{minted}
 
 \begin{figure}[htb]
     \centering
     \input{./plots/modes}
-    \caption{Execution time, for a particular query, with and without Spark's SQL Optimiser.}
-    \label{fig:enter-label1}
+    \caption{Execution time, for the aforementioned query, with and without Spark's Catalyst Optimiser.}
+    \label{fig:optimiser}
 \end{figure}
 
-Without Optimization (Sort Merge Join):
+The full query-plans, for using and without using Catalyst, can be found at the \texttt{optimised\textunderscore plan.txt} and \texttt{non\textunderscore optimised\textunderscore plan.txt} files respectively.
+
+\subsubsection{Without Catalyst (Sort Merge Join)}
 
 \begin{minted}{bash}
 == Physical Plan ==
 *(6) SortMergeJoin [mv_id#8], [mv_id#1], Inner
 \end{minted}
 
-\noindent This is a Sort Merge Join, which is an operation where two dataframes are joined by sorting the data and then merging the sorted data. This type of join is used when the data is too large to fit into memory for a Broadcast Join.
-
-The stages of this join operation involve filtering data where mv\textunderscore id is not null, limiting the result set to 100, then sorting the data and performing the join operation. The SortMergeJoin operation requires that both sides of the join have been partitioned and sorted by the join key (mv\textunderscore id in this case). Hence, there are additional Sort and Exchange operations before the join.
+When not using Catalyst, a Sort Merge Join is opted. This is a process where two dataframes are merged post-sorting. Such joins are prevalent when data cannot fit into memory for a Broadcast Join (this is a fallacious statement in this case of course). The join requires both data sides to be partitioned and sorted by the join key (here, `mv\textunderscore id`). 
 
 \begin{minted}{bash}
 +- *(2) GlobalLimit 100
@@ -81,30 +171,26 @@ The stages of this join operation involve filtering data where mv\textunderscore
 +- *(1) LocalLimit 100
 \end{minted}
 
-\noindent These operations represent the limit that is applied to the "movie\textunderscore genres" table (the query limits the result set to 100). The GlobalLimit means that the limit is applied across the entire dataset, not just per partition.
+The above operations limit the results to 100 for the "movie\textunderscore genres" relation, applying the limit globally. Execution time was 9.73 seconds.
 
-The time taken for the entire operation is 13.2132 seconds.
-
-With Optimization (Broadcast Hash Join):
+\subsubsection{With Catalyst (Broadcast Hash Join)}
 
 \begin{minted}{bash}
 == Physical Plan ==
 *(3) BroadcastHashJoin [mv_id#8], [mv_id#1], Inner, BuildLeft
 \end{minted}
 
-\noindent This is a Broadcast Hash Join, which is a type of join operation where the smaller DataFrame is broadcast to all the nodes containing partitions of the larger DataFrame for comparison and join operations. This type of join can be significantly faster than a sort-merge join because it doesn't require the data to be sorted first, and it can be done entirely in memory if the smaller DataFrame is small enough.
+When utilising Catalyst, a Broadcast Hash Join was used. In this kind of join, the smaller DataFrame is broadcast to the nodes of the larger one. This in-memory operation is quicker than the sort-merge join, especially when the smaller DataFrame is adequately sized.
 
 \begin{minted}[breaklines, breakafter=d]{bash}
 :- BroadcastExchange HashedRelationBroadcastMode(List(cast(input[0, int, false] as bigint)
 \end{minted}
 
-\noindent The BroadcastExchange operation represents broadcasting the smaller DataFrame to the worker nodes. The broadcasting operation will transform the DataFrame into a more efficient data structure (a hash table) to speed up the subsequent join operation.
+The above indicates broadcasting the smaller DataFrame for optimized joining. Execution time post-optimisation: 5.86 seconds, a significant improvement.
 
-The time taken for the entire operation is 3.7529 seconds, which is significantly faster than the time taken when the optimization is not enabled. The optimizer has chosen a more efficient join strategy (broadcast hash join instead of sort merge join) based on the size of the data and the nature of the operation, which leads to a faster execution time.
+To sum up, the difference in execution-plans underlines Spark Catalyst optimiser's role in enhancing Spark job performance. Through optimal decision-making, such as opting for a BroadcastHashJoin over a SortMergeJoin, due to the relations' difference in size, execution times were significantly reduced.
 
-Overall, the difference between these two execution plans demonstrates the power and importance of the Spark Catalyst optimizer in efficiently executing Spark jobs. It can make smart decisions, such as using a BroadcastHashJoin instead of a SortMergeJoin, which significantly improves performance.
-
-\section{Code Snippets}
+\section{Code Snippets} \label{snippets}
 \begin{code}
 \captionof{listing}{\texttt{csv\textunderscore to\textunderscore parquet.py}}
 \label{code:files}

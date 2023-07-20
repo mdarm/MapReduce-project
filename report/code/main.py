@@ -37,7 +37,7 @@ def part1():
     ###################### Task 1 ######################
     # Convert CSVs to Parquet; run only once. Should you
     # wish to repeat the process, comment it out.
-    convert_csv_to_parquet()
+    #convert_csv_to_parquet()
 
 
     ################## Tasks 2, 3 & 4  ##################
@@ -45,27 +45,29 @@ def part1():
 
     # Calculate execution times for each query (Tasks 2, 3 & 4)
     for i in range(1, 6):
-        spark = SparkSession \
-                .builder \
-                .appName("All-use session") \
-                .getOrCreate()
-        sc = spark.sparkContext
+        spark_csv = SparkSession \
+                    .builder \
+                    .appName("All-use session") \
+                    .getOrCreate()
+        spark_parquet = spark_csv
+        spark_rdd = spark_csv.sparkContext
 
         rdd_query_name     = 'rdd_query%s' % (i)
         parquet_query_name = 'sql_parquet_query%s' % (i)
         csv_query_name     = 'sql_csv_query%s' % (i)
         
-        times[rdd_query_name]               = globals()[rdd_query_name](sc)
-        times[parquet_query_name], _        = globals()[parquet_query_name](spark)
-        times[csv_query_name], query_output = globals()[csv_query_name](spark)
+        times[rdd_query_name]               = globals()[rdd_query_name](spark_rdd)
+        times[parquet_query_name], _        = globals()[parquet_query_name](spark_parquet)
+        times[csv_query_name], query_output = globals()[csv_query_name](spark_csv)
 
         # Save the query-output, in dataframe format, on a text file 
         with open('../output/df_results/Q%sDF.txt' % i, 'w') as f:
             f.write(query_output)
 
         # Consistency in execution times
-        spark.stop()
-        sc.stop()
+        spark_csv.stop()
+        spark_parquet.stop()
+        spark_rdd.stop()
         print(times)
 
     # Compute execution times and write to a text file
