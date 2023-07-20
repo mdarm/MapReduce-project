@@ -102,7 +102,7 @@ For more information about execution results, as well as their interpretation, p
 
 ## Sample Outputs
 
-Query [execution-plan](./output/optimised_plan.txt) when joining two realtions, `departments` and `employees`, on the attribute `department id`.
+Query [execution-plan](./output/optimised_plan.txt) when joining two realtions, `departmentsR.csv` and `employeesR.csv`, on the attribute `department_id`.
 ```bash
 == Physical Plan ==
 *(3) BroadcastHashJoin [mv_id#627], [mv_id#620], Inner, BuildLeft
