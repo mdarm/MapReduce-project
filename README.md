@@ -74,14 +74,19 @@ $PROJECT_ROOT
 1. Clone this repository.
 2. Set up the environment, ensuring you have the following versions of PySpark and HDFS:
 <pre>
-PySpark: 2.4.4
-HDFS   : 2.7.7 
+spark==2.4.4
+hadoop==2.7.7 
 </pre>
-3. Make sure that the minimum utilised memory in the Spark configuration (i.e. spark-defaults.conf) at the very least is:
+3. Add the following lines to the Spark configuration (i.e. spark-defaults.conf):
 ```bash
+spark.master spark://master:7077
+spark.submit.deployMode client
+spark.executor.instances 2
+spark.executor.cores 1
 spark.executor.memory 512m
-spark.driver.memory 1024m
+park.driver.memory 1024m
 ```
+pay particular attention to the `park.driver.memory`, since this was a common cause for Java heap errors.
 4. Create the following directory:
 ```bash
 hadoop fs -mkdir -p ~/files
@@ -94,3 +99,4 @@ hadoop fs -put *.csv ~/files
 ```bash
 spark-submit main.py
 ```
+For more information about execution results, as well as their interpretation, please read the [report](./report/coursework.pdf).
