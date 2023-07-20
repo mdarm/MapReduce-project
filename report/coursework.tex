@@ -50,7 +50,7 @@ The same files were then saved in \texttt{.parquet} format, using Snip.~\ref{cod
 
 \begin{figure}[htb]
     \centering
-    \input{barplot}
+    \input{./plots/barplot}
     \caption{Caption}
     \label{fig:enter-label}
 \end{figure}
@@ -59,7 +59,7 @@ The same files were then saved in \texttt{.parquet} format, using Snip.~\ref{cod
 
 \begin{figure}[htb]
     \centering
-    \input{modes}
+    \input{./plots/modes}
     \caption{Execution time, for a particular query, with and without Spark's SQL Optimiser.}
     \label{fig:enter-label1}
 \end{figure}
@@ -111,6 +111,47 @@ Overall, the difference between these two execution plans demonstrates the power
 \inputminted[breaklines, breakafter=d, linenos, frame=single]{python}{./code/csv_to_parquet.py}
 \end{code}
 
+\begin{code}
+\captionof{listing}{\texttt{rdd.py}}
+\label{code:rdd}
+\inputminted[breaklines, breakafter=d, linenos, frame=single]{python}{./code/rdd.py}
+\end{code}
+
+\begin{code}
+\captionof{listing}{\texttt{sql\textunderscore csv.py}}
+\label{code:sql-csv}
+\inputminted[breaklines, breakafter=d, linenos, frame=single]{python}{./code/sql_csv.py}
+\end{code}
+
+\begin{code}
+\captionof{listing}{\texttt{sql\textunderscore parquet.py}}
+\label{code:sql-parquet}
+\inputminted[breaklines, breakafter=d, linenos, frame=single]{python}{./code/sql_parquet.py}
+\end{code}
+
+\begin{code}
+\captionof{listing}{\texttt{joins.py}}
+\label{code:joins}
+\inputminted[breaklines, breakafter=d, linenos, frame=single]{python}{./code/joins.py}
+\end{code}
+
+\begin{code}
+\captionof{listing}{\texttt{optimiser.py}}
+\label{code:optimiser}
+\inputminted[breaklines, breakafter=d, linenos, frame=single]{python}{./code/optimiser.py}
+\end{code}
+
+\begin{code}
+\captionof{listing}{\texttt{utils.py}}
+\label{code:utils}
+\inputminted[breaklines, breakafter=d, linenos, frame=single]{python}{./code/utils.py}
+\end{code}
+
+\begin{code}
+\captionof{listing}{\texttt{main.py}}
+\label{code:main}
+\inputminted[breaklines, breakafter=d, linenos, frame=single]{python}{./code/main.py}
+\end{code}
 
 \include{endmatter}
 
