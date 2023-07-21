@@ -6,11 +6,11 @@ This repository contains the final project for the Big Data Management course, d
 
 ```bash
 $PROJECT_ROOT
-¦   # Project's outputs (query execution-times, query plans etc.) 
+Â¦   # Project's outputs (query execution-times, query plans etc.) 
 +-- output
-¦   # Project's report
+Â¦   # Project's report
 +-- report
-¦   # Modules for perfoming all tasks 
+Â¦   # Modules for perfoming all tasks 
 +-- src
 ```
 
@@ -118,6 +118,6 @@ Query [execution-plan](./output/optimised_plan.txt) when joining two realtions, 
 ```
 
 Query execution-times, for all queries, using RDDs, CSVs and Parquet.
-<picture>
+<p align="center">
   <img src="output/barplot.svg" alt="Image">
-</picture>
+</p>
